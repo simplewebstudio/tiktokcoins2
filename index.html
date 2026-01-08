@@ -2,15 +2,35 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Отключаем масштабирование пользователя и включаем поддержку safe areas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>TikTok Balance Screen</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
+        /* Блокируем скролл и фиксируем размер экрана */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            background-color: white;
         }
+
+        /* Настройка верхней безопасной зоны для Dynamic Island */
+        header {
+            padding-top: calc(env(safe-area-inset-top, 0px) + 1rem) !important;
+        }
+
+        /* Настройка нижней безопасной зоны для Home Indicator */
+        .safe-area-bottom {
+            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem) !important;
+        }
+
         .glitch-button {
             position: relative;
             background: #000;
@@ -55,7 +75,7 @@
         #bottomSheet {
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             transform: translateY(100%);
-            max-height: 42vh; 
+            max-height: 45vh; 
         }
         #bottomSheet.open {
             transform: translateY(0);
@@ -97,17 +117,17 @@
         }
     </style>
 </head>
-<body class="bg-white text-black min-h-screen pb-24 overflow-x-hidden">
+<body class="bg-white text-black">
 
-    <!-- Заголовок -->
-    <header class="flex items-center p-4 sticky top-0 bg-white z-10">
+    <!-- Заголовок с учетом безопасной зоны сверху -->
+    <header class="flex items-center px-4 pb-4 sticky top-0 bg-white z-10 w-full">
         <button class="p-1 hover:bg-gray-100 rounded-full transition">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </button>
         <h1 class="ml-2 text-[20px] font-bold tracking-tight">Scrolling TikTok's balance</h1>
     </header>
 
-    <main class="space-y-4 px-4">
+    <main class="space-y-4 px-4 overflow-hidden">
         
         <!-- Главная карточка с контейнером для монет -->
         <div class="w-full shadow-sm relative overflow-visible">
@@ -120,8 +140,7 @@
         </div>
 
         <div class="space-y-4">
-            <!-- Пакет для первой дозаправки (Кликабельный) -->
-            <!-- Добавлен класс 'group' и удален 'active:scale-[0.98]' -->
+            <!-- Пакет для первой дозаправки -->
             <div id="giftTrigger" class="bg-white border border-gray-100 rounded-2xl p-4 flex justify-between items-center shadow-sm cursor-pointer group transition-all">
                 <div class="space-y-1">
                     <h3 class="font-bold text-[16px]">First recharge package</h3>
@@ -130,7 +149,6 @@
                         Get <span class="ml-1 text-lg">→</span>
                     </span>
                 </div>
-                <!-- Картинка с подарком: теперь только она анимируется при нажатии на блок -->
                 <div class="w-16 h-16 flex items-center justify-center">
                     <img src="https://i.ibb.co/21S9PqPB/4.png" alt="Подарок" 
                          class="w-full h-full object-contain transition-transform duration-200 group-active:scale-110">
@@ -189,6 +207,7 @@
     <!-- Выезжающее модальное окно -->
     <div id="bottomSheetOverlay" class="fixed inset-0 bg-black/60 z-[50] opacity-0 pointer-events-none"></div>
     <div id="bottomSheet" class="fixed bottom-0 left-0 right-0 bg-white z-[60] rounded-t-[24px] px-6 pb-6 pt-2 flex flex-col items-center">
+        <!-- Полоска сверху для управления -->
         <div class="w-10 h-1 bg-gray-200 rounded-full mb-4 mt-1"></div>
         
         <!-- Вид 1: Предложение сундука -->
@@ -213,9 +232,11 @@
                 Confirm
             </button>
         </div>
+        <!-- Запас места снизу для Home Indicator -->
+        <div class="h-[env(safe-area-inset-bottom)]"></div>
     </div>
 
-    <!-- Нижняя навигация -->
+    <!-- Нижняя навигация с учетом безопасной зоны снизу -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white bottom-nav flex justify-between items-center px-2 py-2 safe-area-bottom z-40">
         <button class="flex flex-col items-center justify-center w-1/5 space-y-1">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -316,13 +337,14 @@
             setTimeout(startAutoCoins, 400); 
         });
 
-        const updatePadding = () => {
-            const nav = document.querySelector('nav');
-            if (window.innerHeight > 800) {
-                nav.style.paddingBottom = '24px';
+        // Функция блокировки скролла на мобильных при тач-событиях
+        document.addEventListener('touchmove', function (e) {
+            if (e.target.closest('#bottomSheet') || e.target.closest('main')) {
+                // Разрешаем скролл только если контент не влезает (в данном случае мы фиксируем всё)
             }
-        };
-        window.onload = updatePadding;
+            e.preventDefault();
+        }, { passive: false });
+
     </script>
 </body>
 </html>
