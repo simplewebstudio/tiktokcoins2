@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Balance Screen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glitch-button {
+            position: relative;
+            background: #000;
+            border-radius: 8px;
+            width: 45px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
+        }
+        .glitch-button::before {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: #00F2EA;
+            border-radius: 8px;
+            z-index: -1;
+        }
+        .glitch-button::after {
+            content: '';
+            position: absolute;
+            right: -3px;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: #FF0050;
+            border-radius: 8px;
+            z-index: -2;
+        }
+        .bottom-nav {
+            border-top: 1px solid #f1f1f1;
+        }
+
+        /* Стили модального окна */
+        #bottomSheetOverlay {
+            transition: opacity 0.3s ease;
+        }
+        #bottomSheet {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(100%);
+            max-height: 42vh; 
+        }
+        #bottomSheet.open {
+            transform: translateY(0);
+        }
+
+        /* Эффект плавного появления/исчезновения */
+        .view-transition {
+            transition: opacity 0.3s ease-in-out;
+            opacity: 1;
+        }
+        .view-hidden {
+            opacity: 0;
+        }
+
+        /* Подсветка поля ввода */
+        .promo-input:focus {
+            border-color: #FE2C55;
+            outline: none;
+        }
+
+        /* Анимация монет */
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .coin-bounce {
+            animation: bounceIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            transform-origin: center;
+        }
+        
+        /* Сетка для монет */
+        #coin-overlay {
+            pointer-events: none;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+        }
+    </style>
+</head>
+<body class="bg-white text-black min-h-screen pb-24 overflow-x-hidden">
+
+    <!-- Заголовок -->
+    <header class="flex items-center p-4 sticky top-0 bg-white z-10">
+        <button class="p-1 hover:bg-gray-100 rounded-full transition">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <h1 class="ml-2 text-[20px] font-bold tracking-tight">Scrolling TikTok's balance</h1>
+    </header>
+
+    <main class="space-y-4 px-4">
+        
+        <!-- Главная карточка с контейнером для монет -->
+        <div class="w-full shadow-sm relative overflow-visible">
+            <img src="https://i.ibb.co/9HZkHp6M/TTcard.png" alt="TikTok Card" class="w-full h-auto block select-none">
+            
+            <!-- Контейнер для монет -->
+            <div id="coin-overlay" class="absolute top-[2%] left-[3%] w-[86%] max-w-[300px] pt-12 overflow-visible">
+                <!-- Сюда будут добавляться монеты -->
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <!-- Пакет для первой дозаправки (Кликабельный) -->
+            <!-- Добавлен класс 'group' и удален 'active:scale-[0.98]' -->
+            <div id="giftTrigger" class="bg-white border border-gray-100 rounded-2xl p-4 flex justify-between items-center shadow-sm cursor-pointer group transition-all">
+                <div class="space-y-1">
+                    <h3 class="font-bold text-[16px]">First recharge package</h3>
+                    <p class="text-[13px] text-gray-500">Get Gifts and bonus Coins</p>
+                    <span class="text-[#FE2C55] font-semibold text-[14px] flex items-center pt-1">
+                        Get <span class="ml-1 text-lg">→</span>
+                    </span>
+                </div>
+                <!-- Картинка с подарком: теперь только она анимируется при нажатии на блок -->
+                <div class="w-16 h-16 flex items-center justify-center">
+                    <img src="https://i.ibb.co/21S9PqPB/4.png" alt="Подарок" 
+                         class="w-full h-full object-contain transition-transform duration-200 group-active:scale-110">
+                </div>
+            </div>
+
+            <!-- Раздел Монетизация -->
+            <section class="pt-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="font-bold text-[16px]">Monetization</h2>
+                    <button class="text-[13px] text-gray-500 font-medium">View more ></button>
+                </div>
+                <div class="bg-white rounded-xl">
+                    <div class="flex items-center justify-between py-3 group cursor-pointer">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 flex items-center justify-center mr-3">
+                                <img src="https://i.ibb.co/LjjktV1/3.png" alt="LIVE rewards" class="w-8 h-8 object-contain">
+                            </div>
+                            <span class="text-[15px] font-medium">LIVE rewards</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Раздел Сервисы -->
+            <section class="pt-4 pb-10">
+                <h2 class="font-bold text-[16px] mb-3">Services</h2>
+                <div class="bg-white rounded-xl divide-y divide-gray-50">
+                    <div class="flex items-center justify-between py-3 cursor-pointer">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 flex items-center justify-center mr-3">
+                                <img src="https://i.ibb.co/pjM6NTnd/2.png" alt="Transactions" class="w-8 h-8 object-contain">
+                            </div>
+                            <span class="text-[15px] font-medium">Transactions</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between py-3 cursor-pointer">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 flex items-center justify-center mr-3">
+                                <img src="https://i.ibb.co/rfGD6K4X/1.png" alt="Help & feedback" class="w-8 h-8 object-contain">
+                            </div>
+                            <span class="text-[15px] font-medium">Help & feedback</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Выезжающее модальное окно -->
+    <div id="bottomSheetOverlay" class="fixed inset-0 bg-black/60 z-[50] opacity-0 pointer-events-none"></div>
+    <div id="bottomSheet" class="fixed bottom-0 left-0 right-0 bg-white z-[60] rounded-t-[24px] px-6 pb-6 pt-2 flex flex-col items-center">
+        <div class="w-10 h-1 bg-gray-200 rounded-full mb-4 mt-1"></div>
+        
+        <!-- Вид 1: Предложение сундука -->
+        <div id="chestView" class="w-full flex flex-col items-center view-transition">
+            <h2 class="text-[18px] font-bold mb-4">Gift offer</h2>
+            <div class="w-32 h-32 mb-6 flex items-center justify-center">
+                <img src="https://i.ibb.co/LDfdPvzL/chestopened.png" alt="Сундук" class="w-full h-full object-contain">
+            </div>
+            <button id="getPromoBtn" class="w-full bg-[#FE2C55] text-white font-bold py-3 rounded-lg text-[15px] active:opacity-90 transition-opacity">
+                Get promocode
+            </button>
+        </div>
+
+        <!-- Вид 2: Ввод промокода -->
+        <div id="promoView" class="w-full flex flex-col items-center hidden view-transition view-hidden">
+            <h2 class="text-[18px] font-bold mb-6">Enter Promocode</h2>
+            <div class="w-full mb-6">
+                <input type="text" id="promoInput" placeholder="Enter code here" 
+                    class="w-full bg-gray-100 border border-transparent rounded-lg py-3 px-4 text-[15px] promo-input transition-all">
+            </div>
+            <button id="confirmBtn" class="w-full bg-[#FE2C55] text-white font-bold py-3 rounded-lg text-[15px] active:opacity-90 transition-opacity">
+                Confirm
+            </button>
+        </div>
+    </div>
+
+    <!-- Нижняя навигация -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white bottom-nav flex justify-between items-center px-2 py-2 safe-area-bottom z-40">
+        <button class="flex flex-col items-center justify-center w-1/5 space-y-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span class="text-[10px] text-gray-500 font-medium">Home</span>
+        </button>
+        <button class="flex flex-col items-center justify-center w-1/5 space-y-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            <span class="text-[10px] text-gray-500 font-medium">Discover</span>
+        </button>
+        <div class="flex flex-col items-center justify-center w-1/5 h-12">
+            <div class="glitch-button cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            </div>
+        </div>
+        <button class="flex flex-col items-center justify-center w-1/5 space-y-1 relative">
+            <div class="relative">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <div class="absolute -top-1.5 -right-3 bg-[#FE2C55] text-white text-[9px] px-1 rounded-full font-bold border-2 border-white">99+</div>
+            </div>
+            <span class="text-[10px] text-gray-500 font-medium">Inbox</span>
+        </button>
+        <button class="flex flex-col items-center justify-center w-1/5 space-y-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="black" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="text-[10px] text-black font-bold">Profile</span>
+        </button>
+    </nav>
+
+    <script>
+        const overlay = document.getElementById('bottomSheetOverlay');
+        const sheet = document.getElementById('bottomSheet');
+        const giftTrigger = document.getElementById('giftTrigger');
+        const chestView = document.getElementById('chestView');
+        const promoView = document.getElementById('promoView');
+        const getPromoBtn = document.getElementById('getPromoBtn');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const promoInput = document.getElementById('promoInput');
+        const coinOverlay = document.getElementById('coin-overlay');
+
+        const maxCoinLimit = 16;
+
+        function openSheet() {
+            overlay.classList.remove('pointer-events-none');
+            overlay.classList.add('opacity-100');
+            sheet.classList.add('open');
+            chestView.classList.remove('hidden', 'view-hidden');
+            promoView.classList.add('hidden', 'view-hidden');
+            promoInput.value = '';
+        }
+
+        function closeSheet() {
+            overlay.classList.remove('opacity-100');
+            overlay.classList.add('pointer-events-none');
+            sheet.classList.remove('open');
+        }
+
+        giftTrigger.addEventListener('click', openSheet);
+        overlay.addEventListener('click', closeSheet);
+
+        getPromoBtn.addEventListener('click', () => {
+            chestView.classList.add('view-hidden');
+            setTimeout(() => {
+                chestView.classList.add('hidden');
+                promoView.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    promoView.classList.remove('view-hidden');
+                });
+            }, 300);
+        });
+
+        function spawnCoin() {
+            const coinDiv = document.createElement('div');
+            coinDiv.className = 'mx-[1px] -mt-[16px] coin-bounce';
+            
+            const coinImg = document.createElement('img');
+            coinImg.src = 'https://i.ibb.co/S42SJwyH/TTcoin.png';
+            coinImg.className = 'w-[32px] h-[32px] object-contain';
+            
+            coinDiv.appendChild(coinImg);
+            coinOverlay.appendChild(coinDiv);
+        }
+
+        function startAutoCoins() {
+            let count = 0;
+            coinOverlay.innerHTML = '';
+            
+            const interval = setInterval(() => {
+                if (count >= maxCoinLimit) {
+                    clearInterval(interval);
+                    return;
+                }
+                spawnCoin();
+                count++;
+            }, 180);
+        }
+
+        confirmBtn.addEventListener('click', () => {
+            closeSheet();
+            setTimeout(startAutoCoins, 400); 
+        });
+
+        const updatePadding = () => {
+            const nav = document.querySelector('nav');
+            if (window.innerHeight > 800) {
+                nav.style.paddingBottom = '24px';
+            }
+        };
+        window.onload = updatePadding;
+    </script>
+</body>
+</html>
